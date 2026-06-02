@@ -1,0 +1,21 @@
+ {
+  "rules": {
+    "posts": {
+      ".read": "true",
+      ".indexOn": ["createdAt"],
+      "$post_id": {
+        ".write": "auth != null && (!data.exists() || data.child('authorId').val() === auth.uid)",
+        "likes": {
+          "$user_id": {
+            ".write": "auth != null && auth.uid === $user_id"
+          }
+        },
+        "comments": {
+          "$comment_id": {
+            ".write": "auth != null && ((!data.exists() && newData.child('authorId').val() === auth.uid) || (data.exists() && data.child('authorId').val() === auth.uid))"
+          }
+        }
+      }
+    }
+  }
+}

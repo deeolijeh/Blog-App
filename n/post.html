@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recipe — RecipeHub</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@800&display=swap" rel="stylesheet" />
+  <link href="/n/style.css" rel="stylesheet" />
+  <script src="/n/firebase-config.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main class="container" style="max-width: 800px;">
+    <article id="post" class="my-5"></article>
+
+    <section class="mt-5">
+      <div style="border-top: 2px solid var(--line); padding-top: 2rem;">
+        <h5 style="font-family:'Playfair Display', Georgia, serif; font-weight: 800; font-size: 1.5rem; margin-bottom: 1.5rem;">Comments (<span id="ccount">0</span>)</h5>
+        <form id="cform" class="d-flex gap-2 mb-3">
+          <input id="ctext" class="form-control" placeholder="Share your thoughts…" required style="border-radius: 8px;" />
+          <button class="btn btn-ink" type="submit">Post</button>
+        </form>
+        <p id="cauth" class="meta mb-3"></p>
+        <div id="comments"></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { renderNav } from "/n/nav.js";
+    import {
+      db, auth, ref, onValue, push, set, remove, update,
+      onAuthStateChanged, fmtDate, escapeHTML, serverTimestamp,
+    } from "/n/firebase-init.js";
+    renderNav();
+
+    const id = new URLSearchParams(location.search).get("id");
+    if (!id) location.href = "/n/index.html";
+
+    const postEl = document.getElementById("post");
+    const commentsEl = document.getElementById("comments");
+    const ccount = document.getElementById("ccount");
+    const cform = document.getElementById("cform");
+    const ctext = document.getElementById("ctext");
+    const cauth = document.getElementById("cauth");
+
+    let currentUser = null;
+    onAuthStateChanged(auth, (u) => {
+      currentUser = u;
+      cauth.innerHTML = u ? "" : `<a href="/n/login.html" style="color: var(--accent-green); font-weight: 600;">Sign in</a> to like or comment.`;
+      cform.style.display = u ? "flex" : "none";
+      render();
+    });
+
+    let postData = null;
+    onValue(ref(db, `posts/${id}`), (snap) => {
+      postData = snap.val();
+      if (!postData) { postEl.innerHTML = `<div class="empty">Recipe not found.</div>`; return; }
+      render();
+    });
+
+    onValue(ref(db, `posts/${id}/comments`), (snap) => {
+      const arr = [];
+      snap.forEach((c) => arr.push({ id: c.key, ...c.val() }));
+      arr.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      ccount.textContent = arr.length;
+      commentsEl.innerHTML = arr.map((c) => `
+        <div class="comment" style="padding: 1.5rem 0;">
+          <div><span class="who">${escapeHTML(c.authorName || "Anonymous")}</span><span class="when" style="margin-left: 0.5rem;">${fmtDate(c.createdAt)}</span></div>
+          <div class="mt-1" style="color: #333;">${escapeHTML(c.text || "")}</div>
+          ${currentUser && currentUser.uid === c.authorId ? `<button class="btn btn-link btn-sm p-0" style="color: #e74c3c; text-decoration: none; margin-top: 0.5rem;" data-del="${c.id}">Delete</button>` : ""}
+        </div>
+      `).join("") || `<p class="meta">No comments yet. Be the first!</p>`;
+      commentsEl.querySelectorAll("[data-del]").forEach((b) => {
+        b.onclick = async () => {
+          try {
+            await remove(ref(db, `posts/${id}/comments/${b.dataset.del}`));
+          } catch (e) { alert("Failed to delete comment: " + e.message); }
+        };
+      });
+    });
+
+    function render() {
+      if (!postData) return;
+      const likes = postData.likes ? Object.keys(postData.likes) : [];
+      const liked = currentUser && likes.includes(currentUser.uid);
+      const isAuthor = currentUser && currentUser.uid === postData.authorId;
+      postEl.innerHTML = `
+        <div class="meta mb-3" style="font-size: 0.95rem;">By ${escapeHTML(postData.authorName || "Anonymous")} • ${fmtDate(postData.createdAt)}</div>
+        <h1 class="post-title mb-4" style="font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-size: 2.8rem; line-height: 1.2; color: var(--ink);">${escapeHTML(postData.title || "Untitled Recipe")}</h1>
+        <div style="background: var(--card); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border-left: 4px solid var(--accent-green);">
+          <div class="post-body" style="font-size: 1rem; line-height: 1.8; color: #444; white-space: pre-wrap;">${escapeHTML(postData.body || "")}</div>
+        </div>
+        <div class="d-flex gap-2 align-items-center mt-4 pt-3 border-top">
+          <button id="like" class="like-btn ${liked ? "active" : ""}" style="border-radius: 8px; padding: 0.5rem 1rem;">♥ ${likes.length}</button>
+          ${isAuthor ? `
+            <a href="/n/new.html?id=${id}" class="btn-ghost" style="font-weight: 600;">Edit</a>
+            <button id="del" class="btn-ghost" style="color: #e74c3c; font-weight: 600;">Delete</button>
+          ` : ""}
+        </div>
+      `;
+      const likeBtn = document.getElementById("like");
+      likeBtn.onclick = () => {
+        if (!currentUser) { location.href = "/n/login.html"; return; }
+        const path = `posts/${id}/likes/${currentUser.uid}`;
+        if (liked) remove(ref(db, path));
+        else set(ref(db, path), true);
+      };
+      const delBtn = document.getElementById("del");
+      if (delBtn) delBtn.onclick = async () => {
+        if (!confirm("Delete this recipe?")) return;
+        await remove(ref(db, `posts/${id}`));
+        location.href = "/n/index.html";
+      };
+    }
+
+    cform.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+      const text = ctext.value.trim();
+      if (!text) return;
+      const newRef = push(ref(db, `posts/${id}/comments`));
+      await set(newRef, {
+        text,
+        authorId: currentUser.uid,
+        authorName: currentUser.displayName || currentUser.email,
+        createdAt: serverTimestamp(),
+      });
+      ctext.value = "";
+    });
+  </script>
+</body>
+</html>

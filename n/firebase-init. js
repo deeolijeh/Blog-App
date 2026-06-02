@@ -1,0 +1,44 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+  createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup,
+  updateProfile,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getDatabase, ref, push, set, update, remove, onValue, get, child, serverTimestamp,
+  query, orderByChild,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const app = initializeApp(window.firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const googleProvider = new GoogleAuthProvider();
+
+export {
+  app, auth, db, googleProvider,
+  onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  signOut, signInWithPopup, updateProfile,
+  ref, push, set, update, remove, onValue, get, child, serverTimestamp,
+  query, orderByChild,
+};
+
+export function requireAuth(redirect = "/n/login.html") {
+  return new Promise((resolve) => {
+    onAuthStateChanged(auth, (user) => {
+      if (!user) { window.location.href = redirect; return; }
+      resolve(user);
+    });
+  });
+}
+
+export function fmtDate(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+export function escapeHTML(s = "") {
+  return s.replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RecipeHub — Discover & Share Amazing Recipes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@800&display=swap" rel="stylesheet" />
+  <link href="/n/style.css" rel="stylesheet" />
+  <script src="/n/firebase-config.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Discover, Create and Share Recipes Effortlessly!</h1>
+      <p>Create and share your favorite recipes with a passionate community of food lovers. Explore cuisines from around the world.</p>
+      <div class="hero-actions">
+        <a href="/n/new.html" class="btn btn-ink">Share a Recipe</a>
+        <a href="#featured" class="btn btn-outline-green">Explore Recipes</a>
+      </div>
+    </div>
+    <div class="hero-image">🍳</div>
+  </section>
+
+  <!-- FEATURE CARDS -->
+  <div class="container-wide">
+    <div class="feature-cards" style="margin-top: -3rem; position: relative; z-index: 10;">
+      <div class="feature-card">
+        <div class="icon">🤖</div>
+        <h3>Smarter Meal Planning with AI</h3>
+        <p>AI-powered suggestions to help you plan meals intelligently.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📸</div>
+        <h3>Photo-to-Recipe Magic</h3>
+        <p>Transform your food photos into detailed recipes instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">👥</div>
+        <h3>Community Recipes</h3>
+        <p>Browse thousands of recipes shared by food enthusiasts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">❤️</div>
+        <h3>Health Insights</h3>
+        <p>Get nutritional information and healthy cooking tips.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED RECIPES -->
+  <div class="container-wide" style="padding-top: 4rem;">
+    <div class="section-header" id="featured">
+      <h2>Featured Recipes</h2>
+      <p>Check out our latest and greatest recipes</p>
+    </div>
+    <div class="recipe-grid" id="feed"></div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="container-wide">
+    <div class="how-it-works">
+      <div class="section-header">
+        <h2>How It Works</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Collect Recipes</h3>
+          <p>Save and organize recipes you love from our community.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>AI Meal Plans</h3>
+          <p>Get personalized meal plans based on your preferences.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Share & Create</h3>
+          <p>Share your own recipes and cooking tips with others.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Connect & Learn</h3>
+          <p>Interact with foodies and learn new cooking techniques.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOG/STORIES SECTION -->
+  <div class="container-wide" style="padding-top: 4rem;">
+    <div class="section-header">
+      <h2>The Fresh New Cooklogue Stories</h2>
+      <p>Read our latest cooking tips and food stories</p>
+    </div>
+    <div class="stories-grid" id="stories">
+      <div class="story-card">
+        <div class="story-image">🥗</div>
+        <div class="story-content">
+          <div class="story-date">2 hours ago</div>
+          <h3>How AI is Changing Meal Planning</h3>
+          <p>Discover how artificial intelligence is revolutionizing the way we plan our meals.</p>
+        </div>
+      </div>
+      <div class="story-card">
+        <div class="story-image">🍝</div>
+        <div class="story-content">
+          <div class="story-date">5 hours ago</div>
+          <h3>Easy Meal Prep Ideas Every Morning</h3>
+          <p>Simple and quick meal prep ideas that everyone can prepare at home.</p>
+        </div>
+      </div>
+      <div class="story-card">
+        <div class="story-image">🍖</div>
+        <div class="story-content">
+          <div class="story-date">8 hours ago</div>
+          <div class="story-date">8 hours ago</div>
+          <h3>Cooking Secret Everyone Should Know</h3>
+          <p>Professional chefs share their best cooking hacks and secrets.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY CHOOSE US SECTION -->
+  <div class="container-wide" style="padding: 4rem 2rem; background: linear-gradient(135deg, #f0f9f4 0%, #fff8f3 100%); margin: 4rem 0; border-radius: 16px;">
+    <div class="section-header">
+      <h2>Why People Choose Us?</h2>
+      <p>Join thousands of food enthusiasts who trust RecipeHub</p>
+    </div>
+    <div class="feature-cards">
+      <div class="feature-card">
+        <div class="icon">⏱️</div>
+        <h3>Save Time</h3>
+        <p>Quick recipe searches and meal planning tools save you hours every week.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">💚</div>
+        <h3>Nutrition-Packed</h3>
+        <p>Make healthier food choices with our nutrition insights and recommendations.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🌍</div>
+        <h3>World Cuisines</h3>
+        <p>Explore dishes from every corner of the world shared by our global community.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🎓</div>
+        <h3>Learn & Grow</h3>
+        <p>Improve your cooking skills with tips from experienced food lovers.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="background: var(--card); border-top: 1px solid var(--line); padding: 3rem 2rem; text-align: center; color: var(--muted);">
+    <p>&copy; 2026 RecipeHub. All rights reserved. Share your passion for cooking with the world.</p>
+  </footer>
+
+  <script type="module">
+    import { renderNav } from "/n/nav.js";
+    import { db, ref, query, orderByChild, limitToLast, onValue, fmtDate, escapeHTML } from "/n/firebase-init.js";
+    renderNav();
+
+    const feed = document.getElementById("feed");
+    const postsQ = query(ref(db, "posts"), orderByChild("createdAt"), limitToLast(12));
+
+    onValue(postsQ, (snap) => {
+      const items = [];
+      snap.forEach((c) => {
+        const val = c.val();
+        // Ensure we are grabbing actual post data, not a nested user node
+        if (val && typeof val === 'object' && val.title) {
+          items.push({ id: c.key, ...val });
+        }
+      });
+      console.log("Recipes fetched from DB:", items);
+      items.reverse();
+      if (!items.length) {
+        feed.innerHTML = `<div class="empty" style="grid-column: 1/-1;">No recipes yet. <a href="/n/new.html" style="color: var(--accent-green); font-weight: 600;">Be the first to share one!</a></div>`;
+        return;
+      }
+      feed.innerHTML = items.map((p) => {
+        const likes = p.likes ? Object.keys(p.likes).length : 0;
+        const comments = p.comments ? Object.keys(p.comments).length : 0;
+        const excerpt = (p.body || "").slice(0, 120);
+        return `
+          <a href="/n/post.html?id=${p.id}" class="recipe-card text-decoration-none text-reset">
+            <div class="card-image">🍳</div>
+            <div class="card-content">
+              <h3>${escapeHTML(p.title || "Untitled Recipe")}</h3>
+              <p class="excerpt">${escapeHTML(excerpt)}${(p.body||"").length > 120 ? "…" : ""}</p>
+              <div class="meta">♥ ${likes} · 💬 ${comments}</div>
+            </div>
+          </a>
+        `;
+      }).join("");
+    }, (error) => {
+      console.error("Firebase read error:", error);
+    });
+  </script>
+</body>
+</html>
