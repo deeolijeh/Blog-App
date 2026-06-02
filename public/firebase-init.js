@@ -35,7 +35,7 @@ export async function requireAuth() {
   return new Promise((resolve, reject) => {
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        location.href = "/public/login.html";
+        location.href = "/login.html";
         reject(new Error("Not authenticated"));
       } else {
         resolve(user);
