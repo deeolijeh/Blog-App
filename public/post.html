@@ -46,32 +46,47 @@
     const cauth = document.getElementById("cauth");
 
     let currentUser = null;
+    let commentsData = [];
+    let postData = null;
+
     onAuthStateChanged(auth, (u) => {
       currentUser = u;
       cauth.innerHTML = u ? "" : `<a href="/login.html" style="color: var(--accent-green); font-weight: 600;">Sign in</a> to like or comment.`;
       cform.style.display = u ? "flex" : "none";
-      render();
+      renderAll();
     });
 
-    let postData = null;
     onValue(ref(db, `posts/${id}`), (snap) => {
       postData = snap.val();
       if (!postData) { postEl.innerHTML = `<div class="empty">Recipe not found.</div>`; return; }
-      render();
+      renderAll();
     });
 
     onValue(ref(db, `posts/${id}/comments`), (snap) => {
-      const arr = [];
-      snap.forEach((c) => arr.push({ id: c.key, ...c.val() }));
-      arr.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-      ccount.textContent = arr.length;
-      commentsEl.innerHTML = arr.map((c) => `
-        <div class="comment" style="padding: 1.5rem 0;">
+      commentsData = [];
+      snap.forEach((c) => {
+        commentsData.push({ id: c.key, ...c.val() });
+      });
+      commentsData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      console.log(`Fetched ${commentsData.length} comments for post ${id}`);
+      renderComments();
+    });
+
+    function renderAll() {
+      renderPost();
+      renderComments();
+    }
+
+    function renderComments() {
+      ccount.textContent = commentsData.length;
+      commentsEl.innerHTML = commentsData.map((c) => `
+        <div class="comment">
           <div><span class="who">${escapeHTML(c.authorName || "Anonymous")}</span><span class="when" style="margin-left: 0.5rem;">${fmtDate(c.createdAt)}</span></div>
           <div class="mt-1" style="color: #333;">${escapeHTML(c.text || "")}</div>
           ${currentUser && currentUser.uid === c.authorId ? `<button class="btn btn-link btn-sm p-0" style="color: #e74c3c; text-decoration: none; margin-top: 0.5rem;" data-del="${c.id}">Delete</button>` : ""}
         </div>
       `).join("") || `<p class="meta">No comments yet. Be the first!</p>`;
+
       commentsEl.querySelectorAll("[data-del]").forEach((b) => {
         b.onclick = async () => {
           try {
@@ -79,17 +94,18 @@
           } catch (e) { alert("Failed to delete comment: " + e.message); }
         };
       });
-    });
+    }
 
-    function render() {
+    function renderPost() {
       if (!postData) return;
       const likes = postData.likes ? Object.keys(postData.likes) : [];
       const liked = currentUser && likes.includes(currentUser.uid);
       const isAuthor = currentUser && currentUser.uid === postData.authorId;
       postEl.innerHTML = `
-        <div class="meta mb-3" style="font-size: 0.95rem;">By ${escapeHTML(postData.authorName || "Anonymous")} • ${fmtDate(postData.createdAt)}</div>
-        <h1 class="post-title mb-4" style="font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-size: 2.8rem; line-height: 1.2; color: var(--ink);">${escapeHTML(postData.title || "Untitled Recipe")}</h1>
-        <div style="background: var(--card); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border-left: 4px solid var(--accent-green);">
+        <div class="meta mb-3">By ${escapeHTML(postData.authorName || "Anonymous")} • ${fmtDate(postData.createdAt)}</div>
+        <h1 class="post-title mb-4">${escapeHTML(postData.title || "Untitled Recipe")}</h1>
+        ${postData.image ? `<img src="${postData.image}" style="width: 100%; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">` : ""}
+        <div class="recipe-content-box">
           <div class="post-body" style="font-size: 1rem; line-height: 1.8; color: #444; white-space: pre-wrap;">${escapeHTML(postData.body || "")}</div>
         </div>
         <div class="d-flex gap-2 align-items-center mt-4 pt-3 border-top">

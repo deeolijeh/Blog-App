@@ -118,7 +118,6 @@
         <div class="story-image">🍖</div>
         <div class="story-content">
           <div class="story-date">8 hours ago</div>
-          <div class="story-date">8 hours ago</div>
           <h3>Cooking Secret Everyone Should Know</h3>
           <p>Professional chefs share their best cooking hacks and secrets.</p>
         </div>
@@ -188,9 +187,10 @@
         const likes = p.likes ? Object.keys(p.likes).length : 0;
         const comments = p.comments ? Object.keys(p.comments).length : 0;
         const excerpt = (p.body || "").slice(0, 120);
+        const imgHtml = p.image ? `<img src="${p.image}" alt="${escapeHTML(p.title)}">` : "🍳";
         return `
           <a href="/post.html?id=${p.id}" class="recipe-card text-decoration-none text-reset">
-            <div class="card-image">🍳</div>
+            <div class="card-image">${imgHtml}</div>
             <div class="card-content">
               <h3>${escapeHTML(p.title || "Untitled Recipe")}</h3>
               <p class="excerpt">${escapeHTML(excerpt)}${(p.body||"").length > 120 ? "…" : ""}</p>

@@ -17,6 +17,28 @@
       <p class="text-muted" style="font-family: system-ui, sans-serif;">Let the community discover your favorite dishes.</p>
     </div>
     <form id="form" class="my-3">
+      <div id="camera-section" class="mb-4">
+        <div id="camera-container" style="display: none; margin-bottom: 1rem;">
+          <video id="video" width="100%" autoplay playsinline style="border-radius: 12px; background: #000; max-height: 400px; object-fit: cover;"></video>
+          <div class="d-flex gap-2 mt-2">
+            <button type="button" class="btn btn-ink" id="snap">Capture Photo</button>
+            <button type="button" class="btn btn-outline-secondary" id="cancel-camera">Cancel</button>
+          </div>
+        </div>
+        <div id="preview-container" style="display: none; margin-bottom: 1rem; position: relative;">
+          <img id="photo-preview" src="" style="width: 100%; border-radius: 12px; border: 1px solid var(--line); max-height: 400px; object-fit: cover;">
+          <button type="button" class="btn btn-sm btn-danger" id="remove-photo" style="position: absolute; top: 10px; right: 10px; border-radius: 8px; padding: 0.4rem 0.8rem;">Remove Photo</button>
+        </div>
+        <div id="upload-options" class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-green flex-grow-1" id="start-camera" style="border-style: dashed; padding: 1.5rem;">
+            <span style="font-size: 1.5rem; display: block;">📷</span> Take Photo
+          </button>
+          <button type="button" class="btn btn-outline-green flex-grow-1" id="pick-file" style="border-style: dashed; padding: 1.5rem;">
+            <span style="font-size: 1.5rem; display: block;">🖼️</span> Upload from Gallery
+          </button>
+          <input type="file" id="file-input" accept="image/*" style="display: none;">
+        </div>
+      </div>
       <input class="title form-control mb-3" name="title" placeholder="Recipe Name (e.g., Spicy Garlic Pasta)" required style="border-radius: 8px; border: 1px solid var(--line); padding: 0.75rem; font-size: 1.2rem; font-weight: 600;" />
       <textarea class="body form-control mb-3" name="body" placeholder="Ingredients, instructions, tips, cooking time, servings..." required style="border-radius: 8px; border: 1px solid var(--line); padding: 0.75rem; min-height: 400px; font-family: system-ui, sans-serif;"></textarea>
       <div class="d-flex gap-2 align-items-center">
@@ -38,6 +60,74 @@
     const status = document.getElementById("status");
     const form = document.getElementById("form");
 
+    const startCamBtn = document.getElementById("start-camera");
+    const camContainer = document.getElementById("camera-container");
+    const video = document.getElementById("video");
+    const snapBtn = document.getElementById("snap");
+    const cancelCamBtn = document.getElementById("cancel-camera");
+    const previewContainer = document.getElementById("preview-container");
+    const photoPreview = document.getElementById("photo-preview");
+    const removePhotoBtn = document.getElementById("remove-photo");
+    const pickFileBtn = document.getElementById("pick-file");
+    const fileInput = document.getElementById("file-input");
+    const uploadOptions = document.getElementById("upload-options");
+
+    let stream = null;
+    let capturedImage = null;
+
+    startCamBtn.onclick = async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = stream;
+        camContainer.style.display = "block";
+        uploadOptions.style.display = "none";
+      } catch (err) {
+        alert("Could not access camera: " + err.message);
+      }
+    };
+
+    cancelCamBtn.onclick = () => {
+      if (stream) stream.getTracks().forEach(track => track.stop());
+      camContainer.style.display = "none";
+      uploadOptions.style.display = "flex";
+    };
+
+    snapBtn.onclick = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+      capturedImage = canvas.toDataURL("image/jpeg", 0.7);
+      photoPreview.src = capturedImage;
+      previewContainer.style.display = "block";
+      camContainer.style.display = "none";
+      uploadOptions.style.display = "none";
+      if (stream) stream.getTracks().forEach(track => track.stop());
+    };
+
+    pickFileBtn.onclick = () => fileInput.click();
+
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        capturedImage = event.target.result;
+        photoPreview.src = capturedImage;
+        previewContainer.style.display = "block";
+        uploadOptions.style.display = "none";
+      };
+      reader.readAsDataURL(file);
+    };
+
+    removePhotoBtn.onclick = () => {
+      capturedImage = null;
+      photoPreview.src = "";
+      previewContainer.style.display = "none";
+      uploadOptions.style.display = "flex";
+      fileInput.value = "";
+    };
+
     const user = await requireAuth();
 
     if (editId) {
@@ -46,6 +136,12 @@
       if (!p || p.authorId !== user.uid) { location.href = "/index.html"; }
       form.title.value = p.title || "";
       form.body.value = p.body || "";
+      if (p.image) {
+        capturedImage = p.image;
+        photoPreview.src = p.image;
+        previewContainer.style.display = "block";
+        uploadOptions.style.display = "none";
+      }
       document.getElementById("publish").textContent = "Update Recipe";
     }
 
@@ -57,6 +153,7 @@
         body: form.body.value.trim(),
         authorId: user.uid,
         authorName: user.displayName || user.email,
+        image: capturedImage,
       };
       try {
         if (editId) {

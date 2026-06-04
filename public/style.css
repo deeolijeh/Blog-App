@@ -109,9 +109,13 @@ a { text-decoration: none; color: inherit; }
   background: linear-gradient(135deg, #f0f9f4 0%, #fff8f3 100%);
 }
 
+.hero-content {
+  text-align: left;
+}
+
 .hero-content h1 {
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 3.2rem;
+  font-size: clamp(2.4rem, 8vw, 3.5rem);
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 1.5rem;
@@ -469,8 +473,18 @@ a { text-decoration: none; color: inherit; }
   font-family: "Playfair Display", Georgia, serif;
   font-weight: 800;
   letter-spacing: -0.02em;
-  font-size: 2.6rem;
-  line-height: 1.1;
+  font-size: 2.8rem;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.recipe-content-box {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-left: 4px solid var(--accent-green);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
 
 /* ===== BUTTONS ===== */
@@ -499,7 +513,7 @@ a { text-decoration: none; color: inherit; }
 /* ===== COMMENTS ===== */
 .comment {
   border-top: 1px solid var(--line);
-  padding: 1rem 0;
+  padding: 1.5rem 0;
   font-family: system-ui, sans-serif;
 }
 
@@ -532,11 +546,21 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 768px) {
   .hero {
     grid-template-columns: 1fr;
-    padding: 2rem 1rem;
+    padding: 3rem 1.25rem;
+    gap: 2rem;
+  }
+
+  .hero-content {
+    text-align: center;
   }
 
   .hero-content h1 {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
+  }
+
+  .hero-image {
+    min-height: 250px;
+    order: -1;
   }
 
   .section-header h2 {
@@ -550,5 +574,29 @@ a { text-decoration: none; color: inherit; }
   .feature-cards {
     grid-template-columns: 1fr;
     margin-top: 0;
+  }
+
+  .container-wide {
+    padding: 0 1.25rem;
+  }
+
+  .navbar-lite .container {
+    padding: 1rem 1.25rem;
+  }
+
+  .post-title {
+    font-size: 2rem;
+  }
+
+  .editor input.title {
+    font-size: 1.8rem;
+  }
+
+  .comment {
+    padding: 1rem 0;
+  }
+
+  .hero-actions {
+    justify-content: center;
   }
 }
