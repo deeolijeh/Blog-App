@@ -12,7 +12,9 @@
 <body>
   <div id="nav"></div>
   <main class="container" style="max-width: 800px;">
-    <article id="post" class="my-5"></article>
+    <article id="post" class="my-5">
+      <div class="text-center py-5"><div class="spinner-border text-success" role="status"></div></div>
+    </article>
 
     <section class="mt-5">
       <div style="border-top: 2px solid var(--line); padding-top: 2rem;">
@@ -52,13 +54,13 @@
     onAuthStateChanged(auth, (u) => {
       currentUser = u;
       cauth.innerHTML = u ? "" : `<a href="/login.html" style="color: var(--accent-green); font-weight: 600;">Sign in</a> to like or comment.`;
-      cform.style.display = u ? "flex" : "none";
-      renderAll();
+      if (cform) cform.style.display = u ? "flex" : "none";
+      if (postData) renderPost();
     });
 
     onValue(ref(db, `posts/${id}`), (snap) => {
       postData = snap.val();
-      if (!postData) { postEl.innerHTML = `<div class="empty">Recipe not found.</div>`; return; }
+      if (!postData && snap.exists() === false) { postEl.innerHTML = `<div class="empty">Recipe not found.</div>`; return; }
       renderAll();
     });
 
@@ -78,11 +80,11 @@
     }
 
     function renderComments() {
-      ccount.textContent = commentsData.length;
+      if (ccount) ccount.textContent = commentsData.length;
       commentsEl.innerHTML = commentsData.map((c) => `
         <div class="comment">
           <div><span class="who">${escapeHTML(c.authorName || "Anonymous")}</span><span class="when" style="margin-left: 0.5rem;">${fmtDate(c.createdAt)}</span></div>
-          <div class="mt-1" style="color: #333;">${escapeHTML(c.text || "")}</div>
+          <div class="mt-1 comment-text" style="color: #333; white-space: pre-wrap;">${escapeHTML(c.text || "")}</div>
           ${currentUser && currentUser.uid === c.authorId ? `<button class="btn btn-link btn-sm p-0" style="color: #e74c3c; text-decoration: none; margin-top: 0.5rem;" data-del="${c.id}">Delete</button>` : ""}
         </div>
       `).join("") || `<p class="meta">No comments yet. Be the first!</p>`;

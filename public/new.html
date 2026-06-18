@@ -86,23 +86,45 @@
       }
     };
 
-    cancelCamBtn.onclick = () => {
+    async function downscaleImage(dataUrl, maxWidth = 1000) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(maxWidth / img.width, 1);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          // Use 0.7 quality for a good balance of size and clarity
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = dataUrl;
+      });
+    }
+
+    function stopCamera() {
       if (stream) stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+
+    cancelCamBtn.onclick = () => {
+      stopCamera();
       camContainer.style.display = "none";
       uploadOptions.style.display = "flex";
     };
 
-    snapBtn.onclick = () => {
+    snapBtn.onclick = async () => {
       const canvas = document.createElement("canvas");
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext("2d").drawImage(video, 0, 0);
-      capturedImage = canvas.toDataURL("image/jpeg", 0.7);
+      capturedImage = await downscaleImage(canvas.toDataURL("image/jpeg", 0.8));
       photoPreview.src = capturedImage;
       previewContainer.style.display = "block";
       camContainer.style.display = "none";
       uploadOptions.style.display = "none";
-      if (stream) stream.getTracks().forEach(track => track.stop());
+      stopCamera();
     };
 
     pickFileBtn.onclick = () => fileInput.click();
@@ -111,8 +133,8 @@
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = (event) => {
-        capturedImage = event.target.result;
+      reader.onload = async (event) => {
+        capturedImage = await downscaleImage(event.target.result);
         photoPreview.src = capturedImage;
         previewContainer.style.display = "block";
         uploadOptions.style.display = "none";
@@ -144,6 +166,9 @@
       }
       document.getElementById("publish").textContent = "Update Recipe";
     }
+
+    // Ensure camera turns off if user leaves page
+    window.addEventListener('unload', stopCamera);
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
